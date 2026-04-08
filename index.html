@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaMI: Augmenting Large Language Models via Late Multi-Image Fusion</title>
+    <meta name="description" content="LaMI enhances LLMs with visual commonsense through late multi-image fusion, without multimodal retraining.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+
+<!-- ======== Header ======== -->
+<section class="hero">
+    <div class="container">
+        <h1 class="title">LaMI: Augmenting Large Language Models<br>via Late Multi-Image Fusion</h1>
+        <p class="venue-text"><strong>ACL 2026</strong></p>
+        <div class="authors">
+            <span class="author"><a href="https://guyyariv.github.io/" target="_blank">Guy Yariv</a><sup>1</sup></span>
+            <span class="author"><a href="https://idansc.github.io/" target="_blank">Idan Schwartz</a><sup>2*</sup></span>
+            <span class="author"><a href="https://www.cs.huji.ac.il/~adiyoss/" target="_blank">Yossi Adi</a><sup>1*</sup></span>
+            <span class="author"><a href="https://sagiebenaim.github.io/" target="_blank">Sagie Benaim</a><sup>1*</sup></span>
+        </div>
+        <div class="affiliations">
+            <span><sup>1</sup>The Hebrew University of Jerusalem</span>
+            <span><sup>2</sup>Bar-Ilan University</span>
+        </div>
+        <p class="equal-contribution">* Equal contribution</p>
+        <div class="links">
+            <a href="https://arxiv.org/pdf/2406.13621v2" class="btn" target="_blank"><i class="fa-solid fa-file-pdf"></i> Paper</a>
+            <a href="https://arxiv.org/abs/2406.13621v2" class="btn" target="_blank"><i class="fas fa-archive"></i> ArXiv</a>
+            <a href="https://github.com/guyyariv/LaMI" class="btn" target="_blank"><i class="fab fa-github"></i> Code</a>
+            <a href="#bibtex" class="btn"><i class="fa-solid fa-quote-right"></i> BibTeX</a>
+        </div>
+    </div>
+</section>
+
+<!-- ======== TL;DR ======== -->
+<section class="section" id="tldr">
+    <div class="container container-narrow">
+        <h2>TL;DR</h2>
+        <p class="tldr-text">
+            LaMI augments text-only LLMs with visual commonsense by generating multiple images from the input text at inference time and integrating them via a lightweight late-fusion layer, without any multimodal retraining. It improves visual reasoning while enhancing text-based performance.
+        </p>
+    </div>
+</section>
+
+<!-- ======== Abstract ======== -->
+<section class="section section-gray" id="abstract">
+    <div class="container container-narrow">
+        <h2>Abstract</h2>
+        <p class="abstract-text">
+            Commonsense reasoning often requires both textual and visual knowledge, yet Large Language Models (LLMs) trained solely on text lack visual grounding (e.g., <em>"what color is an emperor penguin's belly?"</em>). Visual Language Models (VLMs) perform better on visually grounded tasks but face two limitations: (i) often reduced performance on text-only commonsense reasoning compared to text-trained LLMs, and (ii) adapting newly released LLMs to vision input typically requires costly multimodal training. An alternative augments LLMs with test-time visual signals, improving visual commonsense without harming textual reasoning, but prior designs often rely on early fusion and a single image, which can be suboptimal.
+        </p>
+        <p class="abstract-text">
+            We propose a late multi-image fusion method: multiple images are generated from the text prompt with a lightweight parallel sampling, and their prediction probabilities are combined with those of a text-only LLM through a late-fusion layer that integrates projected visual features just before the final prediction. Across visual commonsense and NLP benchmarks, our method significantly outperforms augmented LLMs on visual reasoning, matches VLMs on vision-based tasks, and, when applied to strong LLMs such as LLaMA 3, also improves NLP performance while adding only modest test-time overhead.
+        </p>
+    </div>
+</section>
+
+<!-- ======== Method ======== -->
+<section class="section" id="method">
+    <div class="container">
+        <h2>Method</h2>
+        <p class="section-description">
+            LaMI enhances language models with visual cues to improve object and visual commonsense reasoning while preserving text-only performance. The architecture consists of four components: a frozen pre-trained LLM, a frozen pre-trained vision encoder, a trainable Visual Token Projector (VTP), and a trainable Late Fusion Attention Layer (LFAL).
+        </p>
+        <div class="method-figure">
+            <img src="static/images/fig2.png" alt="Overview of the LaMI architecture. Multiple images are generated from the input text and independently encoded by a frozen vision encoder, then projected to pseudo-text tokens. In parallel, the text is processed by a frozen pre-trained LLM. A trainable late-fusion attention layer allows the LLM's final text representations to attend to the projected visual tokens, combining both modalities before the prediction head.">
+            <p class="caption"><strong>Figure 2.</strong> Overview of LaMI. Multiple images are generated from the input text and independently encoded by a frozen vision encoder, then projected to pseudo-text tokens. In parallel, the text is processed by a frozen pre-trained LLM. A trainable late-fusion attention layer allows the LLM's final text representations to attend to the projected visual tokens, combining both modalities before the prediction head. <span class="color-frozen">Blue: frozen</span>; <span class="color-trainable">orange: trainable</span>.</p>
+        </div>
+        <p class="method-text">
+            <strong>Late Fusion Architecture.</strong> The vision encoder extracts patch features, which the VTP maps to pseudo-text embeddings. The LFAL fuses these with text embeddings by allowing text tokens to attend once to visual tokens immediately before projecting to vocabulary logits. This design keeps the LLM focused on language while enabling access to visual information when helpful.
+        </p>
+        <p class="method-text">
+            <strong>Multi-Image Evidence at Inference.</strong> Since paired images are unavailable at test time, <em>k</em> images are generated from the input text using a distilled text-to-image generator with batched, parallel sampling. Each generated image is processed through the late-fusion module to produce a probability distribution, which is then aggregated with the text-only distribution using entropy-aware, CLIP-based weighting.
+        </p>
+    </div>
+</section>
+
+<!-- ======== Results ======== -->
+<section class="section section-gray" id="results">
+    <div class="container">
+        <h2>Results</h2>
+
+        <h3 class="table-title">Object Commonsense</h3>
+        <p class="section-description">
+            LaMI substantially improves performance across all object commonsense tasks compared to prior visually-augmented language models, while using equal or less multimodal training data.
+        </p>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Mem. Color</th>
+                        <th>Color Terms</th>
+                        <th>Obj. Shape</th>
+                        <th>Rel. Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="group-header"><td colspan="5">Masked Language Models</td></tr>
+                    <tr><td>BERT</td><td>31.6</td><td>30.7</td><td>28.1</td><td>38.1</td></tr>
+                    <tr><td>BERT (FT)</td><td>33.9</td><td>31.5</td><td>21.5</td><td>35.7</td></tr>
+                    <tr><td>Vokenization*</td><td>14.2</td><td>20.0</td><td>43.2</td><td>72.4</td></tr>
+                    <tr><td>X-adapter*</td><td>64.1</td><td>60.0</td><td>-</td><td>-</td></tr>
+                    <tr class="highlight"><td><strong>LaMI<sup>&ddagger;</sup></strong></td><td><strong>74.5</strong></td><td><strong>72.5</strong></td><td><strong>67.3</strong></td><td><strong>78.4</strong></td></tr>
+                    <tr class="group-header"><td colspan="5">Causal Language Models</td></tr>
+                    <tr><td>GPT-2</td><td>32.4</td><td>34.6</td><td>44.5</td><td>43.1</td></tr>
+                    <tr><td>GPT-2 (FT)</td><td>33.3</td><td>34.9</td><td>39.3</td><td>38.2</td></tr>
+                    <tr><td>LiVE<sup>&ddagger;</sup></td><td>49.6</td><td>46.7</td><td>41.5</td><td>66.7</td></tr>
+                    <tr><td>Z-LaVI*<sup>&dagger;</sup></td><td>50.4</td><td>49.2</td><td>64.4</td><td>76.8</td></tr>
+                    <tr><td>VaLM* (k=4)</td><td>54.0</td><td>52.7</td><td>62.8</td><td>85.0</td></tr>
+                    <tr><td>VaLM* (k=8)</td><td>58.6</td><td>50.2</td><td>59.4</td><td>62.4</td></tr>
+                    <tr class="highlight"><td><strong>LaMI<sup>&ddagger;</sup></strong></td><td><strong>72.5</strong></td><td><strong>69.2</strong></td><td><strong>66.8</strong></td><td><strong>85.5</strong></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="table-note">* retrieves images; <sup>&dagger;</sup> zero-shot; <sup>&ddagger;</sup> generates images during inference.</p>
+
+        <h3 class="table-title">Ablation: Fusion Strategy and Multi-Image Generation</h3>
+        <p class="section-description">
+            Both late fusion and multi-image generation independently contribute to performance. Their combination achieves the best overall results.
+        </p>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Mem. Color</th>
+                        <th>Color Terms</th>
+                        <th>Obj. Shape</th>
+                        <th>Rel. Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>GPT-2 (Base)</td><td>32.4</td><td>34.6</td><td>44.5</td><td>43.1</td></tr>
+                    <tr><td>Early Fusion</td><td>49.1</td><td>45.3</td><td>40.3</td><td>70.1</td></tr>
+                    <tr><td>Early Fusion + Multi</td><td>55.5</td><td>52.1</td><td>41.2</td><td>75.5</td></tr>
+                    <tr><td>Intermediate Fusion</td><td>62.8</td><td>59.3</td><td>60.0</td><td>77.2</td></tr>
+                    <tr><td>Intermediate Fusion + Multi</td><td>69.7</td><td>67.8</td><td>63.0</td><td>81.1</td></tr>
+                    <tr><td>Late Fusion</td><td>65.1</td><td>62.2</td><td>63.5</td><td>80.2</td></tr>
+                    <tr class="highlight"><td><strong>Late Fusion + Multi (Ours)</strong></td><td><strong>72.5</strong></td><td><strong>69.2</strong></td><td><strong>66.8</strong></td><td><strong>85.5</strong></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="table-title">Visual Commonsense, Commonsense Reasoning, and Reading Comprehension</h3>
+        <p class="section-description">
+            LaMI consistently improves LMs across all scales. Unlike VLMs, which often improve visual commonsense at the cost of text-task performance, LaMI enhances visual commonsense while maintaining or improving text-based results.
+        </p>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Base</th>
+                        <th>VC</th>
+                        <th>CR</th>
+                        <th>RC</th>
+                        <th>Avg.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="group-header"><td colspan="6" class="group-center">Small-Scale Models</td></tr>
+                    <tr><td>GPT-2</td><td>-</td><td>30.3</td><td>46.1</td><td>30.5</td><td>35.6</td></tr>
+                    <tr class="highlight"><td><strong>LaMI</strong></td><td>GPT-2</td><td><strong>38.6</strong></td><td><strong>46.7</strong></td><td><strong>32.2</strong></td><td><strong>39.2</strong></td></tr>
+                    <tr class="group-header"><td colspan="6" class="group-center">Mid-Scale Models</td></tr>
+                    <tr><td>Gemma-2B</td><td>-</td><td>45.6</td><td>63.8</td><td>48.8</td><td>52.7</td></tr>
+                    <tr class="highlight"><td><strong>LaMI</strong></td><td>Gemma-2B</td><td><strong>50.1</strong></td><td><strong>65.1</strong></td><td><strong>48.9</strong></td><td><strong>54.7</strong></td></tr>
+                    <tr class="group-header"><td colspan="6" class="group-center">Large-Scale Models</td></tr>
+                    <tr><td>Vicuna-7B</td><td>-</td><td>45.1</td><td>57.6</td><td>57.5</td><td>53.4</td></tr>
+                    <tr><td>InstructBLIP*</td><td>Vicuna-7B</td><td>50.1</td><td>52.6</td><td>53.6</td><td>52.1</td></tr>
+                    <tr><td>Llava-Next*</td><td>Vicuna-7B</td><td><strong>50.3</strong></td><td>54.5</td><td>54.7</td><td>53.1</td></tr>
+                    <tr class="highlight"><td><strong>LaMI</strong></td><td>Vicuna-7B</td><td>48.6</td><td><strong>58.8</strong></td><td><strong>57.9</strong></td><td><strong>55.1</strong></td></tr>
+                    <tr class="backbone-sep"><td colspan="6"></td></tr>
+                    <tr><td>Llama3-8B</td><td>-</td><td>52.0</td><td>72.0</td><td>57.9</td><td>60.6</td></tr>
+                    <tr class="highlight"><td><strong>LaMI</strong></td><td>Llama3-8B</td><td><strong>55.0</strong></td><td><strong>72.9</strong></td><td><strong>58.0</strong></td><td><strong>62.0</strong></td></tr>
+                    <tr class="group-header"><td colspan="6" class="group-center">Large-Scale Instruct Models</td></tr>
+                    <tr><td>Llama3-8B-Instruct</td><td>-</td><td>53.0</td><td>71.6</td><td>59.2</td><td>61.2</td></tr>
+                    <tr><td>Llava-Next*</td><td>Llama3-8B-Inst.</td><td><strong>56.5</strong></td><td>70.8</td><td>54.8</td><td>60.7</td></tr>
+                    <tr class="highlight"><td><strong>LaMI</strong></td><td>Llama3-8B-Inst.</td><td>55.6</td><td><strong>71.7</strong></td><td><strong>60.9</strong></td><td><strong>62.7</strong></td></tr>
+                    <tr class="backbone-sep"><td colspan="6"></td></tr>
+                    <tr><td>Qwen-2.5-7B-Instruct</td><td>-</td><td>54.8</td><td>75.6</td><td>63.0</td><td>64.4</td></tr>
+                    <tr><td>Qwen2-VL-7B-Instruct*</td><td>Qwen-2.5-7B-Inst.</td><td><strong>59.0</strong></td><td>74.4</td><td>57.9</td><td>63.7</td></tr>
+                    <tr class="highlight"><td><strong>LaMI</strong></td><td>Qwen-2.5-7B-Inst.</td><td>57.8</td><td><strong>75.9</strong></td><td><strong>64.4</strong></td><td><strong>66.0</strong></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="table-note">* VLM trained on large-scale image-text data. VC = Visual Commonsense, CR = Commonsense Reasoning, RC = Reading Comprehension.</p>
+    </div>
+</section>
+
+<!-- ======== Qualitative ======== -->
+<section class="section" id="qualitative">
+    <div class="container container-narrow">
+        <h2>Qualitative Analysis</h2>
+        <p class="section-description">Representative examples using Llama-3 illustrating the behavior of LaMI.</p>
+        <div class="qualitative-examples">
+            <div class="example success">
+                <h4>Success Case</h4>
+                <p class="example-question">"How many humps does a Bactrian camel have?"</p>
+                <p>Llama-3 predicts <em>one</em>, confusing Dromedary and Bactrian species. LaMI generates images of two-humped camels, correcting the prediction to <strong>two</strong>.</p>
+            </div>
+            <div class="example robustness">
+                <h4>Robustness to Negation</h4>
+                <p class="example-question">"Which color is not on a stop sign?"</p>
+                <p>The generator produces a red stop sign, which is misleading under negation. However, the low CLIP alignment score suppresses the visual path, and LaMI falls back to the text-only prediction, correctly outputting <strong>blue</strong>.</p>
+            </div>
+            <div class="example failure">
+                <h4>Failure Case</h4>
+                <p class="example-question">"What material holds the Sword of Damocles?"</p>
+                <p>Llama-3 predicts <em>a thin rope</em>. LaMI generates images depicting a metal chain&mdash;a visually plausible but incorrect depiction (the correct answer is <em>a single horse hair</em>). The high alignment score causes the visual path to override the text prior. Such failures are more likely for abstract or legendary concepts where text-to-image generators lack faithful grounding.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======== BibTeX ======== -->
+<section class="section section-gray" id="bibtex">
+    <div class="container container-narrow">
+        <h2>BibTeX</h2>
+        <div class="bibtex-container">
+            <button class="copy-btn" onclick="copyBibtex()" title="Copy to clipboard"><i class="fa-regular fa-copy"></i></button>
+            <pre><code id="bibtex-code">@inproceedings{yariv2026lami,
+  title={LaMI: Augmenting Large Language Models via Late Multi-Image Fusion},
+  author={Yariv, Guy and Schwartz, Idan and Adi, Yossi and Benaim, Sagie},
+  booktitle={Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year={2026}
+}</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- ======== Footer ======== -->
+<footer>
+    <div class="container">
+        <p>This page is maintained by the authors of LaMI. For questions, please contact <a href="#">Guy Yariv</a>.</p>
+    </div>
+</footer>
+
+<script>
+function copyBibtex() {
+    const code = document.getElementById('bibtex-code').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+        setTimeout(() => { btn.innerHTML = '<i class="fa-regular fa-copy"></i>'; }, 2000);
+    });
+}
+</script>
+
+</body>
+</html>
