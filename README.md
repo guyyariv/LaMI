@@ -6,9 +6,8 @@ Commonsense reasoning often requires both textual and visual knowledge, yet Larg
 
 <a href="https://arxiv.org/abs/2406.13621v2"><img src="https://img.shields.io/badge/arXiv-2406.13621-b31b1b.svg" height=22.5></a>
 <a href="https://pages.cs.huji.ac.il/adiyoss-lab/vLMIG/"><img src="https://img.shields.io/static/v1?label=Project&message=Website&color=red" height=22.5></a>
-<a href="https://colab.research.google.com/drive/1-idBJHvI9cPAQ7GQq5in-4Sa_wiHzQkT?usp=sharing"><img src="https://img.shields.io/badge/Colab-F9AB00?style=for-the-badge&logo=googlecolab&color=525252" height=22.5></a>
 
-![figure3](https://github.com/guyyariv/vLMIG/assets/89798559/e2a46b40-b7ca-4fea-80dd-ee15d1fa18f4)
+![LaMI teaser](assets/teaser.png)
 
 
 # Installation
