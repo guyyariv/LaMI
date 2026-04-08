@@ -1,12 +1,11 @@
-# Improving Visual Commonsense in Language Models via Multiple Image Generation
-This repo contains the official PyTorch implementation of  [*Improving Visual Commonsense in Language Models via Multiple Image Generation*](https://pages.cs.huji.ac.il/adiyoss-lab/vLMIG/)
+# LaMI: Augmenting Large Language Models via Late Multi-Image Fusion
+This repo contains the official PyTorch implementation of [*LaMI: Augmenting Large Language Models via Late Multi-Image Fusion*](https://arxiv.org/abs/2406.13621v2) (ACL 2026).
 
 # Abstract
-Commonsense reasoning is fundamentally based on multimodal knowledge. However, existing large language models (LLMs) are primarily trained using textual data only, limiting their ability to incorporate essential visual information. In contrast, Visual Language Models, which excel at visually-oriented tasks, often fail at non-visual tasks such as basic commonsense reasoning. 
-This divergence highlights a critical challenge - the integration of robust visual understanding with foundational text-based language reasoning. To this end, we introduce a method aimed at enhancing LLMs' visual commonsense. Specifically, our method generates multiple images based on the input text prompt and integrates these into the model's decision-making process by mixing their prediction probabilities. To facilitate multimodal grounded language modeling, we employ a late-fusion layer that combines the projected visual features with the output of a pre-trained LLM conditioned on text only. This late-fusion layer enables predictions based on comprehensive image-text knowledge as well as text only when this is required. We evaluate our approach using several visual commonsense reasoning tasks together with traditional NLP tasks, including common sense reasoning and reading comprehension. Our experimental results demonstrate significant superiority over existing baselines. When applied to recent state-of-the-art LLMs (e.g., Llama3), we observe improvements not only in visual common sense but also in traditional NLP benchmarks.
+Commonsense reasoning often requires both textual and visual knowledge, yet Large Language Models (LLMs) trained solely on text lack visual grounding (e.g., "what color is an emperor penguin's belly?"). Visual Language Models (VLMs) perform better on visually grounded tasks but face two limitations: (i) often reduced performance on text-only commonsense reasoning compared to text-trained LLMs, and (ii) adapting newly released LLMs to vision input typically requires costly multimodal training. An alternative augments LLMs with test-time visual signals, improving visual commonsense without harming textual reasoning, but prior designs often rely on early fusion and a single image, which can be suboptimal. We propose a late multi-image fusion method: multiple images are generated from the text prompt with a lightweight parallel sampling, and their prediction probabilities are combined with those of a text-only LLM through a late-fusion layer that integrates projected visual features just before the final prediction. Across visual commonsense and NLP benchmarks, our method significantly outperforms augmented LLMs on visual reasoning, matches VLMs on vision-based tasks, and, when applied to strong LLMs such as LLaMA 3, also improves NLP performance while adding only modest test-time overhead.
 
-<a href="https://arxiv.org/abs/2406.13621"><img src="https://img.shields.io/badge/arXiv-2406.13621-b31b1b.svg" height=22.5></a>
-<a href="https://pages.cs.huji.ac.il/adiyoss-lab/vLMIG/"><img src="https://img.shields.io/static/v1?label=Project&message=Website&color=red" height=22.5></a> 
+<a href="https://arxiv.org/abs/2406.13621v2"><img src="https://img.shields.io/badge/arXiv-2406.13621-b31b1b.svg" height=22.5></a>
+<a href="https://pages.cs.huji.ac.il/adiyoss-lab/vLMIG/"><img src="https://img.shields.io/static/v1?label=Project&message=Website&color=red" height=22.5></a>
 <a href="https://colab.research.google.com/drive/1-idBJHvI9cPAQ7GQq5in-4Sa_wiHzQkT?usp=sharing"><img src="https://img.shields.io/badge/Colab-F9AB00?style=for-the-badge&logo=googlecolab&color=525252" height=22.5></a>
 
 ![figure3](https://github.com/guyyariv/vLMIG/assets/89798559/e2a46b40-b7ca-4fea-80dd-ee15d1fa18f4)
@@ -14,10 +13,10 @@ This divergence highlights a critical challenge - the integration of robust visu
 
 # Installation
 ```
-git clone git@github.com:guyyariv/visually_grounded_lm.git
-cd visually_grounded_lm
-python -m venv vlmig
-source vlmig/bin/activate
+git clone git@github.com:guyyariv/LaMI.git
+cd LaMI
+python -m venv lami
+source lami/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -74,7 +73,7 @@ We evaluate the model on multiple benchmarks:
 #### Visual Commonsense:
 For ImageNetVC evaluation (based on the official implementation https://github.com/hemingkx/ImageNetVC/blob/main/VaLM/BLIP-2/ImageNetVC.py):
 ```angular2html
-python3 eval_scripts/imagenetVC.py --model_name meta-llama/Meta-Llama-3-8B --run_name llama3_imagenetvc --pretrained_model output/llama3/ft_wiki_laion_220_2 --generate_images True --k 10 
+python3 eval_scripts/imagenetVC.py --model_name meta-llama/Meta-Llama-3-8B --run_name llama3_imagenetvc --pretrained_model output/llama3/ft_wiki_laion_220_2 --generate_images True --k 10
 ```
 Access script parameters with:
 ```angular2html
@@ -107,21 +106,18 @@ python3 eval_scripts/boolq.py --help
 ```
 
 # Acknowledgments
-Our code it partially built upon [Transformers training example script](https://github.com/huggingface/transformers/tree/main/examples/pytorch/language-modeling) and [ImagenetVC](https://github.com/hemingkx/ImageNetVC/tree/main)
+Our code is partially built upon [Transformers training example script](https://github.com/huggingface/transformers/tree/main/examples/pytorch/language-modeling) and [ImagenetVC](https://github.com/hemingkx/ImageNetVC/tree/main).
 
 # Cite
 If you use our work in your research, please cite the following paper:
 ```
-@misc{yariv2024improving,
-      title={Improving Visual Commonsense in Language Models via Multiple Image Generation}, 
-      author={Guy Yariv and Idan Schwartz and Yossi Adi and Sagie Benaim},
-      year={2024},
-      eprint={2406.13621},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL}
+@inproceedings{yariv2026lami,
+  title={LaMI: Augmenting Large Language Models via Late Multi-Image Fusion},
+  author={Yariv, Guy and Schwartz, Idan and Adi, Yossi and Benaim, Sagie},
+  booktitle={Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year={2026}
 }
 ```
 
 # License
-This repository is released under the MIT license as found in the [LICENSE](LICENSE) file. 
-
+This repository is released under the MIT license as found in the [LICENSE](LICENSE) file.
