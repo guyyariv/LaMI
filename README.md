@@ -108,11 +108,14 @@ Our code is partially built upon [Transformers training example script](https://
 # Cite
 If you use our work in your research, please cite the following paper:
 ```
-@inproceedings{yariv2026lami,
+@misc{yariv2026lamiaugmentinglargelanguage,
   title={LaMI: Augmenting Large Language Models via Late Multi-Image Fusion},
-  author={Yariv, Guy and Schwartz, Idan and Adi, Yossi and Benaim, Sagie},
-  booktitle={Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (ACL)},
-  year={2026}
+  author={Guy Yariv and Idan Schwartz and Yossi Adi and Sagie Benaim},
+  year={2026},
+  eprint={2406.13621},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2406.13621},
 }
 ```
 
