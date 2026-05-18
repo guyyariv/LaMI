@@ -110,4 +110,4 @@ Built on the [Transformers language-modeling examples](https://github.com/huggin
 
 ## License
 
-Released under the MIT license — see [LICENSE](LICENSE).
+Released under the MIT license. See [LICENSE](LICENSE).
