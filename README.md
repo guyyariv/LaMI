@@ -104,6 +104,7 @@ Built on the [Transformers language-modeling examples](https://github.com/huggin
     year      = {2026},
     publisher = {Association for Computational Linguistics},
     url       = {https://aclanthology.org/2026.acl-short.3/},
+    doi       = {10.18653/v1/2026.acl-short.3},
     pages     = {18--26},
 }
 ```
