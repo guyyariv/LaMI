@@ -97,14 +97,25 @@ Built on the [Transformers language-modeling examples](https://github.com/huggin
 ## Citation
 
 ```bibtex
-@misc{yariv2026lamiaugmentinglargelanguage,
-      title={LaMI: Augmenting Large Language Models via Late Multi-Image Fusion}, 
-      author={Guy Yariv and Idan Schwartz and Yossi Adi and Sagie Benaim},
-      year={2026},
-      eprint={2406.13621},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL},
-      url={https://arxiv.org/abs/2406.13621}, 
+@inproceedings{yariv-etal-2026-lami,
+    title = "{L}a{MI}: Augmenting Large Language Models via Late Multi-Image Fusion",
+    author = "Yariv, Guy  and
+      Schwartz, Idan  and
+      Adi, Yossi  and
+      Benaim, Sagie",
+    editor = "Liakata, Maria  and
+      Moreira, Viviane P.  and
+      Zhang, Jiajun  and
+      Jurgens, David",
+    booktitle = "Proceedings of the 64th Annual Meeting of the {A}ssociation for {C}omputational {L}inguistics (Volume 2: Short Papers)",
+    month = jul,
+    year = "2026",
+    address = "San Diego, California, United States",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2026.acl-short.3/",
+    doi = "10.18653/v1/2026.acl-short.3",
+    pages = "18--26",
+    ISBN = "979-8-89176-391-3"
 }
 ```
 
